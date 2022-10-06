@@ -12,8 +12,6 @@ class UserController{
     index = async (req, res) => {
         try {
 
-            rabbitmq
-
             // Getting all users
             const users = await User.findAll({})
 
