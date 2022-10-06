@@ -3,41 +3,11 @@ const db = require('../../config/db');
 // User Model
 const User = db.users;
 
-// Helper
+// Helpers
 const ResponseBulider = require('../helpers/responseBulider');
-
-let amqp = require('amqplib/callback_api');
+const RabbitMqHelper = require('../helpers/rabbitMqHelper');
 
 class UserController{
-
-    // Sending To Rabbitmq
-    rabbit = (severity, data) => {
-        amqp.connect('amqp://localhost', function(error0, connection) {
-          if (error0) {
-            throw error0;
-          }
-          connection.createChannel(function(error1, channel) {
-            if (error1) {
-              throw error1;
-            }
-            var exchange = 'direct_logs';
-               
-            // Ambil mulai dari index pertama dan jadikan string
-            var msg = data;
-        
-            channel.assertExchange(exchange, 'direct', {
-              durable: false
-            });
-            channel.publish(exchange, severity, Buffer.from(msg));
-            console.log(" [x] Sent %s: '%s'", severity, msg);
-          });
-        
-          setTimeout(function() {
-            connection.close();
-            process.exit(0)
-          }, 500);
-        });
-    }
 
     // All Data
     index = async (req, res) => {
@@ -85,7 +55,7 @@ class UserController{
         }
 
         // Sending to Rabbitmq
-        const send = this.rabbit('insert_user', JSON.stringify(data));
+        const send = RabbitMqHelper.send('insert_user', JSON.stringify(data));
 
         // Return 
         return ResponseBulider.success(res, send); 
