@@ -2,6 +2,9 @@
 
 var amqp = require('amqplib/callback_api');
 
+// Array for severity
+const args = ["insert_user", "update_user", "delete_user"]
+
 amqp.connect('amqp://localhost', function(error0, connection) {
 
   if (error0) {
@@ -29,9 +32,9 @@ amqp.connect('amqp://localhost', function(error0, connection) {
       console.log(' [*] Waiting for logs. To exit press CTRL+C');
 
       // Foreach untuk binding exchange dengan queuenya
-    //   args.forEach(function(severity) {
-    //     channel.bindQueue(q.queue, exchange, severity);
-    //   });
+      args.forEach(function(severity) {
+        channel.bindQueue(q.queue, exchange, severity);
+      });
 
       channel.consume(q.queue, function(msg) {
         console.log(" [x] %s: '%s'", msg.fields.routingKey, msg.content.toString());
