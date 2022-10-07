@@ -3,7 +3,13 @@
 var amqp = require('amqplib/callback_api');
 
 // Array for severity
-const args = ["insert_user", "update_user", "delete_user"]
+const args = ["store_user", "update_user", "delete_user"]
+
+// Controller
+const UserController = require('../api/controllers/UserController')
+
+// Initiate Controller
+const userController = new UserController()
 
 amqp.connect('amqp://localhost', function(error0, connection) {
 
@@ -37,7 +43,17 @@ amqp.connect('amqp://localhost', function(error0, connection) {
       });
 
       channel.consume(q.queue, function(msg) {
+        
+        // Replacing _user
+        let method = msg.fields.routingKey.replace('_user', '');
+
         console.log(" [x] %s: '%s'", msg.fields.routingKey, msg.content.toString());
+
+        // Calling Create User
+        if(method == args[0].replace('_user', '')){
+          userController.store(msg.content.toString())
+        }
+
       }, {
         noAck: true
       });

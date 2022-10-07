@@ -45,7 +45,7 @@ class UserController{
     }
 
     // Create Data
-    store = async (req, res) => {
+    store_request = async (req, res) => {
 
         let data = {
             name: req.body.name,
@@ -55,17 +55,22 @@ class UserController{
         }
 
         // Sending to Rabbitmq
-        const send = RabbitMqHelper.send('insert_user', JSON.stringify(data));
+        const send = RabbitMqHelper.send('store_user', JSON.stringify(data));
 
         // Return 
         return ResponseBulider.success(res, send); 
+    }
 
+    // Create Data
+    store = async (data) => {
+        
         // Process Create
-        // await User.create(data).then((result) => {
-
-        //     // Return 
-        //     return ResponseBulider.success(res, result);            
-        // })
+        await User.create(JSON.parse(data)).then((result) => {
+            
+            // Return 
+            console.log('Input data Berhasil')
+            // return ResponseBulider.success(res, result);            
+        })
     }
 
     // Update One User
