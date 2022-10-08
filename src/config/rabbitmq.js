@@ -54,6 +54,11 @@ amqp.connect('amqp://localhost', function(error0, connection) {
           userController.store(msg.content.toString())
         }
 
+        // Calling Update User
+        if(method == args[1].replace('_user', '')){
+          userController.update(msg.content.toString())
+        }
+
       }, {
         noAck: true
       });

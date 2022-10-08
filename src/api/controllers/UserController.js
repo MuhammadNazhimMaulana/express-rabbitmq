@@ -93,9 +93,6 @@ class UserController{
                 
                 // Return 
                 return ResponseBulider.success(res, send); 
-
-                // Update one User
-               await User.update(req.body, { where: { id: user.id }});
             }
 
         } catch (error) {
@@ -105,22 +102,26 @@ class UserController{
     }
 
     // Update One User
-    update = async (req, res) => {
+    update = async (data) => {
         try {
 
-            // Finding one User
-            const user = await User.findOne({ where: { id: req.params.id }});
+            // Object Result
+            const result = JSON.parse(data)
 
-            // If id isn't found
-            if(user == null){
-                return ResponseBulider.error(res, 404, 'User Not Found');   
-            }else{
-                // Update one User
-               await User.update(req.body, { where: { id: user.id }});
+            // Preparing Data
+            let update_data = {
+                name: result.name,
+                email: result.email,
+                age: result.age,
+                address: result.address, 
             }
+            
+            // Update one User
+            await User.update(update_data, { where: { id: result.id }});
+            
+            // Return 
+            console.log('Update data Berhasil')         
 
-
-            return ResponseBulider.success(res, user);
         } catch (error) {
             // If Error
             return ResponseBulider.error(res, 500, error.message); 
