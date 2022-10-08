@@ -44,7 +44,7 @@ class UserController{
         }
     }
 
-    // Create Data
+    // Request Create Data
     store_request = async (req, res) => {
 
         let data = {
@@ -71,6 +71,37 @@ class UserController{
             console.log('Input data Berhasil')
             // return ResponseBulider.success(res, result);            
         })
+    }
+
+    // Request Update One User
+    update_request = async (req, res) => {
+        try {
+
+            // Finding one User
+            const user = await User.findOne({ where: { id: req.params.id }});
+
+            // If id isn't found
+            if(user == null){
+                return ResponseBulider.error(res, 404, 'User Not Found');   
+            }else{
+
+                // Combining the data (old and new)
+                const data ={ ...user.dataValues, ...req.body }
+
+                // Sending to Rabbitmq
+                const send = RabbitMqHelper.send('update_user', JSON.stringify(data));
+                
+                // Return 
+                return ResponseBulider.success(res, send); 
+
+                // Update one User
+               await User.update(req.body, { where: { id: user.id }});
+            }
+
+        } catch (error) {
+            // If Error
+            return ResponseBulider.error(res, 500, error.message); 
+        }
     }
 
     // Update One User

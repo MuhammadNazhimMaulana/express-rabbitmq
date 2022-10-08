@@ -15,7 +15,7 @@ router.get('/:id', userController.show);
 router.post('/', userController.store_request);
 
 // Update
-router.put('/:id', userController.update);
+router.put('/:id', userController.update_request);
 
 // Delete
 router.delete('/:id', userController.delete);
