@@ -67,11 +67,11 @@ class UserController{
             // Process Create
             await User.create(JSON.parse(msg)).then((result) => {
                 
-                // Return 
-                return ResponseBulider.success(res, result);            
             })
         })
-
+        
+        // Return 
+        return ResponseBulider.success(res, 'Store User Berhasil');            
     }
 
     // Request Update One User
