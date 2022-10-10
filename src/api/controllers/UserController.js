@@ -124,6 +124,8 @@ class UserController{
     // Delete one User
     delete = async (req, res) => {
         try {
+            // Instance For Rabbit MQ
+            const broker = await rabbitmq.getInstance()
 
             // Finding one User
             const user = await User.findOne({ where: { id: req.params.id }});
@@ -132,10 +134,22 @@ class UserController{
             if(user == null){
                 return ResponseBulider.error(res, 404, 'User Not Found');   
             }else{
-                // Delete one User
-               await User.destroy({ where: { id: user.id }});
-            }
 
+                // Combining the data (old and new)
+                const data = req.params.id
+
+                // Sending to Rabbitmq
+                broker.publish('delete_user', JSON.stringify(data))
+
+                // Directly Consume
+                broker.consume('delete_user', async (msg) => {
+                    // Object Result
+                    const result = JSON.parse(msg)
+                    
+                    // Delete one User
+                    await User.destroy({ where: { id: result }});
+                })
+            }
 
             return ResponseBulider.success(res, 'User Deleted');
         } catch (error) {
