@@ -5,7 +5,9 @@ const User = db.users;
 
 // Helpers
 const ResponseBulider = require('../helpers/responseBulider');
-const RabbitMqHelper = require('../helpers/rabbitMqHelper');
+
+// Rabbit MQ
+const rabbitmq = require('../../config/rabbitmq')
 
 class UserController{
 
@@ -44,9 +46,12 @@ class UserController{
         }
     }
 
-    // Request Create Data
-    store_request = async (req, res) => {
+    // Create Data
+    store = async (req, res) => {
 
+        // Instance For Rabbit MQ
+        const broker = await rabbitmq.getInstance()
+        
         let data = {
             name: req.body.name,
             email: req.body.email,
@@ -55,22 +60,18 @@ class UserController{
         }
 
         // Sending to Rabbitmq
-        const send = RabbitMqHelper.send('store_user', JSON.stringify(data));
+        broker.publish('store_user', JSON.stringify(data))
 
-        // Return 
-        return ResponseBulider.success(res, send); 
-    }
-
-    // Create Data
-    store = async (data) => {
-        
-        // Process Create
-        await User.create(JSON.parse(data)).then((result) => {
-            
-            // Return 
-            console.log('Input data Berhasil')
-            // return ResponseBulider.success(res, result);            
+        // Directly Consume
+        broker.consume('store_user', async (msg) => {
+            // Process Create
+            await User.create(JSON.parse(msg)).then((result) => {
+                
+                // Return 
+                return ResponseBulider.success(res, result);            
+            })
         })
+
     }
 
     // Request Update One User

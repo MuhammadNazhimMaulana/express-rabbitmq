@@ -8,7 +8,7 @@ require('dotenv').config();
 require('./config/db');
 
 // Connection Rabbitmq
-require('./config/rabbitmq');
+const rabbitmq = require('./config/rabbitmq');
 
 // Server and Express Config
 const app = express();
@@ -24,6 +24,6 @@ app.use('/user', user_route);
 
 // Port
 const PORT = process.env.PORT;
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
     console.log(`Server Jalan di http://localhost:${PORT}`)
 })
