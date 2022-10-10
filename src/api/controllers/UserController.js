@@ -75,8 +75,10 @@ class UserController{
     }
 
     // Request Update One User
-    update_request = async (req, res) => {
+    update = async (req, res) => {
         try {
+            // Instance For Rabbit MQ
+            const broker = await rabbitmq.getInstance()
 
             // Finding one User
             const user = await User.findOne({ where: { id: req.params.id }});
@@ -90,38 +92,28 @@ class UserController{
                 const data ={ ...user.dataValues, ...req.body }
 
                 // Sending to Rabbitmq
-                const send = RabbitMqHelper.send('update_user', JSON.stringify(data));
+                broker.publish('update_user', JSON.stringify(data))
+
+                // Directly Consume
+                broker.consume('update_user', async (msg) => {
+                    // Object Result
+                    const result = JSON.parse(msg)
+
+                    // Preparing Data
+                    let update_data = {
+                        name: result.name,
+                        email: result.email,
+                        age: result.age,
+                        address: result.address, 
+                    }
                 
-                // Return 
-                return ResponseBulider.success(res, send); 
+                    // Update one User
+                    await User.update(update_data, { where: { id: result.id }});
+                })
             }
 
-        } catch (error) {
-            // If Error
-            return ResponseBulider.error(res, 500, error.message); 
-        }
-    }
-
-    // Update One User
-    update = async (data) => {
-        try {
-
-            // Object Result
-            const result = JSON.parse(data)
-
-            // Preparing Data
-            let update_data = {
-                name: result.name,
-                email: result.email,
-                age: result.age,
-                address: result.address, 
-            }
-            
-            // Update one User
-            await User.update(update_data, { where: { id: result.id }});
-            
             // Return 
-            console.log('Update data Berhasil')         
+            return ResponseBulider.success(res, "Update User Berhasil"); 
 
         } catch (error) {
             // If Error
