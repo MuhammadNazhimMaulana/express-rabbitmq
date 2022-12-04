@@ -8,7 +8,7 @@ require('dotenv').config();
 require('./config/db');
 
 // Connection Rabbitmq
-const rabbitmq = require('./config/rabbitmq');
+require('./config/rabbitmq');
 
 // Server and Express Config
 const app = express();
